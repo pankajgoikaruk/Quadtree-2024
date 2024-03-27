@@ -3,7 +3,7 @@ import pandas as pd
 class Point:
     def __init__(self, x, y, index, CMPLNT_FR_DT, CMPLNT_DATETIME, Scl_Longitude, Scl_Latitude, Hour_of_crime, Dayofweek_of_crime, Quarter_of_crime, Month_of_crime, Dayofyear_of_crime, Dayofmonth_of_crime, Weekofyear_of_crime, Year_of_crime, Distance_From_Central_Point, Crime_count, Longitude_Latitude_Ratio, Location_density): # , Twelve_Month_Differenced, 
         
-        self.x = x # Longitude
+        self.x = x # Longitude this is a sample
         self.y = y # Latitude
         self.index = index
         self.CMPLNT_FR_DT = CMPLNT_FR_DT
