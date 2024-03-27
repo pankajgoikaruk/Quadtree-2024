@@ -57,7 +57,7 @@ data = prp.data_import(data_path)
 
 # Step 2: Get sample data.
 data = prp.get_sample_data(data)
-df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(10)
+df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(100000)
 
 # Step 3:  Check null values.
 df = prp.null_values_check(df)
