@@ -35,6 +35,8 @@ Next Target:
 7. Nearest Neighbor Search: Implement a nearest neighbor search algorithm to find the closest data points to each point in the leaf node. This method ensures that we capture the most relevant data points based on spatial proximity.
 
 '''
+####### Working nice.
+
 # Import the necessary libraries 
 import numpy as np
 import pandas as pd
@@ -57,7 +59,7 @@ data = prp.data_import(data_path)
 
 # Step 2: Get sample data.
 data = prp.get_sample_data(data)
-df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(10)
+df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(100000)
 
 # Step 3:  Check null values.
 df = prp.null_values_check(df)

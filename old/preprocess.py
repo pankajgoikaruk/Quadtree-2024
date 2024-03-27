@@ -6,15 +6,11 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.stattools import adfuller
-from sklearn.preprocessing import MinMaxScaler
 import warnings
 warnings.filterwarnings('ignore')
 import seaborn as sns
 color_pal = sns.color_palette()
 # %matplotlib inline
-
-# Initialize the scaler
-min_max_scaler = MinMaxScaler(feature_range=(1, 10))
 
 
 class Preprocess:
@@ -52,25 +48,12 @@ class Preprocess:
         df.drop(columns=['CMPLNT_FR_TM'], inplace=True) # df.drop(columns=['CMPLNT_FR_DT', 'CMPLNT_FR_TM'], inplace=True)
         df = df[['CMPLNT_FR_DT', 'CMPLNT_DATETIME', 'Longitude', 'Latitude']] # Rearranged the columns.
         return df
-    
-    
 
     # Perform time series analysis
     def crime_total_count(self, df):
         # time_series_data = df.groupby('CMPLNT_FR_DT').size().reset_index(name='Crime_count')
         df['Crime_count'] = df.groupby('CMPLNT_FR_DT')['CMPLNT_FR_DT'].transform('count')
-        df['Crime_count'] = self.min_max_scale_values(df)
-        return df
-    
-    # Scale the target values
-    def min_max_scale_values(self, combined_df):
-        # Reshape the Crime_count column to a 2D array
-        crime_counts = combined_df['Crime_count'].values.reshape(-1, 1)
-
-        # Fit and transform the scaled values
-        combined_df['Crime_count'] = min_max_scaler.fit_transform(crime_counts)
-        
-        return combined_df['Crime_count']
+        return df 
     
     # Adding some new features to Dataframe.
     def create_new_features(self, df):
@@ -96,8 +79,6 @@ class Preprocess:
         # Drop the redundant Location_Density column
         new_df.drop(columns=['Location_Density'], inplace=True)
 
-        df['CMPLNT_FR_DT'], df['CMPLNT_DATETIME'] = self.datetime_to_unix_timestamps(df)
-
         # Example: Calculate the distance from a central point
         central_longitude = new_df['Longitude'].mean()
         central_latitude = new_df['Latitude'].mean()
@@ -115,14 +96,7 @@ class Preprocess:
 
         # Rearrange columns
         new_df = new_df[['index', 'CMPLNT_FR_DT', 'CMPLNT_DATETIME', 'Longitude', 'Latitude', 'Scl_Longitude', 'Scl_Latitude', 'Hour_of_crime',  'Dayofweek_of_crime',  'Quarter_of_crime',  'Month_of_crime',  'Dayofyear_of_crime',  'Dayofmonth_of_crime',  'Weekofyear_of_crime', 'Year_of_crime', 'Distance_From_Central_Point', 'Crime_count', 'Longitude_Latitude_Ratio', 'Location_density']]
-        return new_df      
-
-    # Convert datetime columns to Unix timestamps
-    def datetime_to_unix_timestamps(self, data):
-        data['CMPLNT_FR_DT'] = data['CMPLNT_FR_DT'].astype('int64') // 10**9 # we used Unix timestamp from nanoseconds to seconds
-        data['CMPLNT_DATETIME'] = data['CMPLNT_DATETIME'].astype('int64') // 10**9
-
-        return data['CMPLNT_FR_DT'], data['CMPLNT_DATETIME']  
+        return new_df        
         
             
 
