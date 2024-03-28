@@ -40,6 +40,11 @@ class Make_Quadtree:
         # Initialize the quadtree with the boundary rectangle
         quadtree = Quadtree(boundary_rectangle, max_points, max_levels)
 
+        # Root prediciton
+        df['parent_pred'] = quadtree.root_node_prediction(df, col_name = 'parent_pred')
+
+        print(df)
+
         # Extract data points from Longitude and Latitude columns and insert them into the quadtree
         for index, row in df.iterrows():
             longitude = row['Longitude']
@@ -61,11 +66,12 @@ class Make_Quadtree:
             Distance_From_Central_Point = row['Distance_From_Central_Point']
             # Twelve_Month_Differenced = row['Twelve_Month_Differenced']
             Crime_count = row['Crime_count']
+            parent_pred = row['parent_pred']
             Longitude_Latitude_Ratio = row['Longitude_Latitude_Ratio']
             Location_density = row['Location_density']
 
 
-            point = Point(longitude, latitude, index, CMPLNT_FR_DT, CMPLNT_DATETIME, Scl_Longitude, Scl_Latitude, Hour_of_crime, Dayofweek_of_crime, Quarter_of_crime, Month_of_crime, Dayofyear_of_crime, Dayofmonth_of_crime, Weekofyear_of_crime, Year_of_crime, Distance_From_Central_Point, Crime_count, Longitude_Latitude_Ratio, Location_density) # , Twelve_Month_Differenced, Crime_count
+            point = Point(longitude, latitude, index, CMPLNT_FR_DT, CMPLNT_DATETIME, Scl_Longitude, Scl_Latitude, Hour_of_crime, Dayofweek_of_crime, Quarter_of_crime, Month_of_crime, Dayofyear_of_crime, Dayofmonth_of_crime, Weekofyear_of_crime, Year_of_crime, Distance_From_Central_Point, Crime_count, parent_pred, Longitude_Latitude_Ratio, Location_density) # , Twelve_Month_Differenced, Crime_count
             quadtree.insert(point) 
         
         return quadtree

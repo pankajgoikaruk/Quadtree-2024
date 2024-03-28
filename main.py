@@ -10,18 +10,9 @@ Updated Topics:
 5. Divide data into 80% and 20% train and test dataframe. (13/02/2024)
 6. Create Quadtree file and started implementation of quadtree. (14/02/2024)
 7. Worked in insert function.  (15/02/2024) - (17/02/2024)
-8. Sorting the issue of data fetching from leaf node. (17/02/2024) - (18/02/2024)
-9. Fetched correct leaf node data points and stored in corresponding DCRs with displaying total numbers of data points in each DCRs. (19/02/2024)
-10. Update def remove_outlier(self, df):, used quantile techniqe to remove outliers. (20/02/2024)
-11. Added some methods called ADF and remove seasonality from time series. (21-2-2024)
-12. Added new column call DCR ID to maintain which data points belongs to which DCRs. Addtionally converted list of DCRs into Dataframe. Training and Testing dataset is splited and printed recusrsively. (22/02/2024)
-13. Predicted Value added to main test dataframe (24/02/2024)
-14. Fixed the issue of train split dataset and performed perfect training and testing process. (25 to 26 /02/2024)
-15. Fixed train and test split of orignal dataset. Added new file and class called Make_Quadreee. (25/02/2024)
-16. Split data into seen_df and unseen_df and perfomed following process on seen_df. fix the issue of min_points and max_level in make_quadree.py file. (13/03/2024)
-17. Set Crime_count as target variable and we scaled its values as well. Created MinMaxScaler method in modelling.py file and perfomed scaler on Crime_count. Created inverse method in modelling.py. 
-    Sorted date while fetching the data point from def get_leaf_data_points(self): in quadtree.py file. Updated if isinstance(leaf_data_frames, list): in main.py file to rid off from concat() issue. 
-    reset date and time colume by converting from unix timestamp to date and time in modelling.py file, self.unix_timestamps_to_datetime(test_df) (15/03/2024)
+8 Quadtree is ready and prediction on parent nodes are working fine. (27-3-2024)
+9. Prediction on root node and distrubution in child node is done. Now we are ready to experiment performance on model. Root ID is still not working well need to fix. Level allocation is working fine. (28-3-2024)
+
 
 
 Next Target:
@@ -57,7 +48,7 @@ data = prp.data_import(data_path)
 
 # Step 2: Get sample data.
 data = prp.get_sample_data(data)
-df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(10)
+df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(1000)
 
 # Step 3:  Check null values.
 df = prp.null_values_check(df)
@@ -73,8 +64,12 @@ df = prp.crime_total_count(df)
 df = prp.create_new_features(df)
 
 # ###################################### CREATING QUADTREE AND DISTRIBUTING DATA POINTS INTO LIST OF DATA FRAMES ######################################
-# Step 7:  Create Quadtree.
+# Step 7:  Create Quadtree. The Quadtree object represents the root node of the quadtree
 quadtree = quad.make_quadtree(df)
+
+# # Assuming `quadtree` is the root node of your quadtree
+# quadtree.print_tree()
+
 
 # Step 11:  Visualize the quadtree
 vis.visualize_quadtree(quadtree)
