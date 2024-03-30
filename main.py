@@ -12,6 +12,7 @@ Updated Topics:
 7. Worked in insert function.  (15/02/2024) - (17/02/2024)
 8 Quadtree is ready and prediction on parent nodes are working fine. (27-3-2024)
 9. Prediction on root node and distrubution in child node is done. Now we are ready to experiment performance on model. Root ID is still not working well need to fix. Level allocation is working fine. (28-3-2024)
+10. Divided data into seen and unseen data. Perform inverse Crime_count and Parent_pred column at parent prediction method. 
 
 
 
@@ -33,14 +34,19 @@ from matplotlib import path
 from preprocess import Preprocess
 from visualise import Visualise
 from make_quadtree import Make_Quadtree
+from modelling import Modelling
 ###################################### DATA PREPROCESSING ######################################     
 
 # Created object of classes.
 prp = Preprocess()
-vis = Visualise()
+vis = Visualise() 
 quad = Make_Quadtree()
+mod = Modelling()
 
 data_path = 'C:/Users/goikar/Quadtree/data/USA_Crime_2008_to_2009.csv'
+combined_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/combined_leaf_data_frames.csv'
+train_evaluation_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/train_evaluation_df.csv'
+test_evaluation_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/test_evaluation_df.csv'
 
 # Step 1: Load crime data from csv file.
 data = prp.data_import(data_path)
@@ -48,7 +54,7 @@ data = prp.data_import(data_path)
 
 # Step 2: Get sample data.
 data = prp.get_sample_data(data)
-df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(1000)
+df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(100000)
 
 # Step 3:  Check null values.
 df = prp.null_values_check(df)
@@ -63,16 +69,40 @@ df = prp.crime_total_count(df)
 # Step 5:  Adding some new features to Dataframe and Scaling Longitute and Latitude. 
 df = prp.create_new_features(df)
 
-# ###################################### CREATING QUADTREE AND DISTRIBUTING DATA POINTS INTO LIST OF DATA FRAMES ######################################
+# Step 6: Splitted main data frame into seen and unseen data frame for training and testing purpose.
+seen_df, unseen_df = mod.train_val_test_df_split(df, train_size=0.9)
+
+# print(seen_df)
+
+###################################### CREATING QUADTREE AND DISTRIBUTING DATA POINTS INTO LIST OF DATA FRAMES ######################################
 # Step 7:  Create Quadtree. The Quadtree object represents the root node of the quadtree
-quadtree = quad.make_quadtree(df)
+quadtree = quad.make_quadtree(seen_df)
 
-# # Assuming `quadtree` is the root node of your quadtree
-# quadtree.print_tree()
+# Step 8: Call the get_leaf_data_points() method to retrieve the list of DataFrames
+leaf_data_frames = quadtree.get_leaf_data_points()
 
+# Step 9: Count daily crimes
+prp.count_daily_crime(leaf_data_frames)
+
+# prp.get_max_min_daily_crime_count(leaf_data_frames)
+
+# Step 10:  Print Train_df Data
+vis.label_and_print_dcrs_list(leaf_data_frames)
+
+combined_df = pd.concat(leaf_data_frames)
+
+# Step 13:  Save the combined DataFrame to a CSV file
+combined_df.to_csv(combined_df_path, index=False)
 
 # Step 11:  Visualize the quadtree
 vis.visualize_quadtree(quadtree)
+
+###################################### MODELLING, TRAINING and TESTING ######################################
+
+
+
+
+
 
 
 

@@ -75,6 +75,16 @@ class Visualise:
         ax.set_title('Quadtree Visualization')
         plt.show()
     
+    # Print or process the list of DataFrames in leaf_data_frame
+    def label_and_print_dcrs_list(self, leaf_data_frames):
+        for i, df in enumerate(leaf_data_frames):
+            num_points = len(df)
+            print(f"DCR {i + 1}:")
+            print(f"DCR {i + 1}: has {num_points} data points")
+            df['DCR_ID'] = f"DCR {i + 1}"
+            print(df)
+            print()
+    
     
     
 

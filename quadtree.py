@@ -2,13 +2,16 @@ import pandas as pd
 import numpy as np
 from xgboost import XGBRegressor
 from sklearn.preprocessing import MinMaxScaler
+from modelling import Modelling
+
+mod = Modelling()
 
 # Initialize the scaler
 min_max_scaler = MinMaxScaler(feature_range=(1, 10))
 
 
 class Point:
-    def __init__(self, x, y, index, CMPLNT_FR_DT, CMPLNT_DATETIME, Scl_Longitude, Scl_Latitude, Hour_of_crime, Dayofweek_of_crime, Quarter_of_crime, Month_of_crime, Dayofyear_of_crime, Dayofmonth_of_crime, Weekofyear_of_crime, Year_of_crime, Distance_From_Central_Point, Crime_count, parent_pred, Longitude_Latitude_Ratio, Location_density): # , Twelve_Month_Differenced, 
+    def __init__(self, x, y, index, CMPLNT_FR_DT, CMPLNT_DATETIME, Scl_Longitude, Scl_Latitude, Hour_of_crime, Dayofweek_of_crime, Quarter_of_crime, Month_of_crime, Dayofyear_of_crime, Dayofmonth_of_crime, Weekofyear_of_crime, Year_of_crime, Distance_From_Central_Point, Crime_count, Parent_pred, Longitude_Latitude_Ratio, Location_density): # , Twelve_Month_Differenced, 
         
         self.x = x # Longitude
         self.y = y # Latitude
@@ -28,7 +31,7 @@ class Point:
         self.Distance_From_Central_Point = Distance_From_Central_Point
         # self.Twelve_Month_Differenced = Twelve_Month_Differenced
         self.Crime_count = Crime_count
-        self.parent_pred = parent_pred
+        self.Parent_pred = Parent_pred
         self.Longitude_Latitude_Ratio = Longitude_Latitude_Ratio
         self.Location_density = Location_density
 
@@ -161,15 +164,19 @@ class Quadtree:
         self.next_node_id += 1  # Increment next_node_id
         self.children.append(se_quadtree)
 
+        # Extract all attribute from current node.
         df = self.get_current_node_data(self.points)
 
-        # # Perfome Prediction on each parent level.
-        # predictions = self.root_node_prediction(df, col_name='Crime_Count')
+        # Perfome Prediction on each parent level.
+        df = mod.parent_node_prediction(df)
 
+        # DELETE IT.
         # # Add a new column 'Predicted_Crime_Count' to the DataFrame and assign predicted values to it
-        # df['Predicted_Crime_Count'] = predictions
+        # # df['Predicted_Crime_Count'] = predictions   # Store each parent node's prediction in new column
+        # df['Parent_pred'] = y_pred  # Replace prediciton of root node's prediction with each nodes prediction.
 
-        print(df)
+        # # Print every parent nodes.
+        # print(df)
 
         # # Update the node ID and level for child nodes
         # for child in self.children:
@@ -182,91 +189,22 @@ class Quadtree:
                 if child.boundary.contains_point(point.x, point.y):
                     child.insert(point)
                     break       
-
+        
+        # Empty parent nodes including root node.
         # self.points = []
-    
-    def print_tree(self):
-        """
-        Print information about each node in the quadtree using depth-first traversal.
-        """
-        self._print_node(self)
-
-    def _print_node(self, node):
-        """
-        Helper function to print information about a node and its children recursively.
-        """
-        print(f"Node ID: {id(node)}, Level: {node.level}, Data Points: {len(node.points)}")
-
-        # Recursively print information about children
-        for child in node.children:
-            self._print_node(child)
 
     def is_leaf(self):
         """
         Check if the current node is a leaf node (i.e., it has no children).
         """
         return len(self.children) == 0 
-    
-    def root_node_prediction(self, df, col_name):
-        """
-        Perform prediction at the root node using a predictive model trained on the provided data.
 
-        Parameters:
-        - data: DataFrame containing the data points within the boundary of the root node.
-        - features: List of feature column names used for prediction.
-        - target: Name of the target variable column used for prediction.
-
-        Returns:
-        - Predicted values for the target variable at the root node.
-        """
-
-        # Define features and target variable
-        FEATURES = ['CMPLNT_FR_DT', 'CMPLNT_DATETIME', 'Hour_of_crime', 'Scl_Longitude', 'Scl_Latitude',
-                    'Dayofweek_of_crime', 'Quarter_of_crime', 'Month_of_crime', 'Dayofyear_of_crime',
-                    'Dayofmonth_of_crime', 'Weekofyear_of_crime', 'Year_of_crime', 'Distance_From_Central_Point', 'Longitude_Latitude_Ratio','parent_pred', 'Location_density'] # 'Crime_count', 'Scl_Longitude', 'Scl_Latitude', 
-        TARGET = 'Crime_count'
-
-        df['CMPLNT_FR_DT'], df['CMPLNT_DATETIME'] = self.datetime_to_unix_timestamps(df)
-        df[col_name] = self.min_max_scale_values(df)
-
-        # Extract features and target variable from the data
-        X_train = df[FEATURES]
-        y_train = df[TARGET]
-
-        # Initialize XGBoost Model
-        XGBreg_model = XGBRegressor(base_score=0.5, booster='gbtree', n_estimators=1000,
-                        early_stopping_rounds=50, objective='reg:linear', max_depth=3, learning_rate=0.01)
-        
-        # Fit Model
-        XGBreg_model.fit(X_train, y_train, eval_set=[(X_train, y_train)], verbose=100)
-
-        # Make predictions
-        y_pred = XGBreg_model.predict(X_train)
-
-        return y_pred
-    
-    # Convert datetime columns to Unix timestamps
-    def datetime_to_unix_timestamps(self, data):
-        data['CMPLNT_FR_DT'] = data['CMPLNT_FR_DT'].astype('int64') // 10**9 # we used Unix timestamp from nanoseconds to seconds
-        data['CMPLNT_DATETIME'] = data['CMPLNT_DATETIME'].astype('int64') // 10**9
-
-        return data['CMPLNT_FR_DT'], data['CMPLNT_DATETIME']
-
-    # Scale the target values
-    def min_max_scale_values(self, df):
-        # Reshape the Crime_count column to a 2D array
-        crime_counts = df['Crime_count'].values.reshape(-1, 1)
-
-        # Fit and transform the scaled values
-        df['Crime_count'] = min_max_scaler.fit_transform(crime_counts)
-        
-        return df['Crime_count']
-
+    # Extract all attribute from current node.
     def get_current_node_data(self, points):
-        data = {'index': [], 'CMPLNT_FR_DT': [], 'CMPLNT_DATETIME': [], 'Longitude': [], 'Latitude': [], 'Scl_Longitude': [], 'Scl_Latitude': [], 'Hour_of_crime': [], 'Dayofweek_of_crime': [], 'Quarter_of_crime': [], 'Month_of_crime': [], 'Dayofyear_of_crime': [], 'Dayofmonth_of_crime': [], 'Weekofyear_of_crime': [], 'Year_of_crime': [], 'Distance_From_Central_Point': [], 'Crime_count': [], 'parent_pred': [], 'Longitude_Latitude_Ratio': [], 'Location_density': []} # , 'Twelve_Month_Differenced': []
+        data = {'index': [], 'CMPLNT_FR_DT': [], 'CMPLNT_DATETIME': [], 'Longitude': [], 'Latitude': [], 'Scl_Longitude': [], 'Scl_Latitude': [], 'Hour_of_crime': [], 'Dayofweek_of_crime': [], 'Quarter_of_crime': [], 'Month_of_crime': [], 'Dayofyear_of_crime': [], 'Dayofmonth_of_crime': [], 'Weekofyear_of_crime': [], 'Year_of_crime': [], 'Distance_From_Central_Point': [], 'Crime_count': [], 'Parent_pred': [], 'Longitude_Latitude_Ratio': [], 'Location_density': []} # , 'Twelve_Month_Differenced': []
 
         # Extract data points from leaf node
-        for point in self.points:
+        for point in points:
             data['index'].append(point.index)
             data['CMPLNT_FR_DT'].append(point.CMPLNT_FR_DT)
             data['CMPLNT_DATETIME'].append(point.CMPLNT_DATETIME)
@@ -285,11 +223,56 @@ class Quadtree:
             data['Distance_From_Central_Point'].append(point.Distance_From_Central_Point)
             # data['Twelve_Month_Differenced'].append(point.Twelve_Month_Differenced)
             data['Crime_count'].append(point.Crime_count)
-            data['parent_pred'].append(point.parent_pred)
+            data['Parent_pred'].append(point.Parent_pred)
             data['Longitude_Latitude_Ratio'].append(point.Longitude_Latitude_Ratio)
             data['Location_density'].append(point.Location_density)       
 
         # Create DataFrame
         df = pd.DataFrame(data)
         return df
+    
+    # Recursively Traverse the quadtree and find leaf nodes. 
+    def get_leaf_nodes(self):
+        """
+        Get all leaf nodes in the quadtree.
+        """
+        leaf_nodes = []
+
+        # Helper function to recursively traverse the quadtree
+        def traverse(node):
+            if node.is_leaf():
+                leaf_nodes.append(node)
+            else:
+                for child in node.children:
+                    traverse(child)
+
+        # Start traversal from the root node
+        traverse(self)
+
+        return leaf_nodes
+    # Get all data points of current node.
+    def get_leaf_data_points(self):
+        """
+        Retrieve all data points from leaf nodes and store them in a list of DataFrames.
+        """
+        leaf_nodes = self.get_leaf_nodes()
+        leaf_data_frames = []
+
+        for i, leaf_node in enumerate(leaf_nodes):
+            num_points = len(leaf_node.points)
+            if num_points == 0: # To skip the null data frame.
+                continue
+
+            df = self.get_current_node_data(leaf_node.points)
+
+            # # Sort DataFrame by 'CMPLNT_FR_DT'
+            # df.sort_values(by='CMPLNT_DATETIME', inplace=True)
+
+            # Store DataFrame in list
+            leaf_data_frames.append(df)
+
+            # # Print information about the leaf node
+            # print(f"DCR {i + 1}: has {num_points} data points")
+
+        return leaf_data_frames
 
