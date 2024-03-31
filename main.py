@@ -12,7 +12,9 @@ Updated Topics:
 7. Worked in insert function.  (15/02/2024) - (17/02/2024)
 8 Quadtree is ready and prediction on parent nodes are working fine. (27-3-2024)
 9. Prediction on root node and distrubution in child node is done. Now we are ready to experiment performance on model. Root ID is still not working well need to fix. Level allocation is working fine. (28-3-2024)
-10. Divided data into seen and unseen data. Perform inverse Crime_count and Parent_pred column at parent prediction method. 
+10. Divided data into seen and unseen data. Perform inverse Crime_count and Parent_pred column at parent prediction method. (29-3-2024)
+11. Now, root, parents and leaf nodes prediction are working fine. Mostly changes has done in modelling.py file. (30-3-2024)
+
 
 
 
@@ -45,8 +47,9 @@ mod = Modelling()
 
 data_path = 'C:/Users/goikar/Quadtree/data/USA_Crime_2008_to_2009.csv'
 combined_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/combined_leaf_data_frames.csv'
-train_evaluation_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/train_evaluation_df.csv'
-test_evaluation_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/test_evaluation_df.csv'
+new_combined_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/new_combined_df_path.csv'
+seen_df_evaluation_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/seen_df_evaluation_df.csv'
+unseen_df_evaluation_df_path = 'C:/Users/goikar/Quadtree/12-2-2024/output_29-3-2024/unseen_df_evaluation_df.csv'
 
 # Step 1: Load crime data from csv file.
 data = prp.data_import(data_path)
@@ -54,7 +57,7 @@ data = prp.data_import(data_path)
 
 # Step 2: Get sample data.
 data = prp.get_sample_data(data)
-df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(100000)
+df = data[['CMPLNT_FR_DT', 'CMPLNT_FR_TM','Longitude','Latitude']].head(1000000)
 
 # Step 3:  Check null values.
 df = prp.null_values_check(df)
@@ -89,12 +92,22 @@ prp.count_daily_crime(leaf_data_frames)
 # Step 10:  Print Train_df Data
 vis.label_and_print_dcrs_list(leaf_data_frames)
 
+# Step 11: Conctinated the list of dataframes and stored in dataframe.
 combined_df = pd.concat(leaf_data_frames)
 
-# Step 13:  Save the combined DataFrame to a CSV file
+# Step 12:  Save the combined DataFrame to a CSV file
 combined_df.to_csv(combined_df_path, index=False)
 
-# Step 11:  Visualize the quadtree
+# Step 13: Collected all leaf node and perfomed prediction on each node.
+evaluation_df, new_combined_df = mod.leaf_nodes_predictions(combined_df)
+
+# Step 14: Stored prediction in csv file.
+new_combined_df.to_csv(new_combined_df_path, index=False)
+
+
+evaluation_df.to_csv(seen_df_evaluation_df_path, index=False)
+
+# Step **:  Visualize the quadtree
 vis.visualize_quadtree(quadtree)
 
 ###################################### MODELLING, TRAINING and TESTING ######################################

@@ -85,6 +85,25 @@ class Visualise:
             print(df)
             print()
     
+    # Plot full time trends with predicted time trends.
+    def actual_prediction_plot(self, seen_df, test_df):
+        seen_df = seen_df.set_index('CMPLNT_FR_DT')
+        test_df = test_df.set_index('CMPLNT_FR_DT')
+
+        plt.figure(figsize=(10, 6)) 
+        plt.plot(seen_df.index, seen_df['Crime_count'], linestyle='-', label='Actual') # marker='o',
+        # Plot predicted values
+        plt.plot(test_df.index, test_df['Predicted_Crime_count'], linestyle='-', label='Predicted') # marker='x', 
+
+        plt.title('Crime Count Over Time')
+        plt.xlabel('Crimes from 2008-2009')
+        plt.ylabel('Number of Crimes Per Day')
+        plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+        plt.grid(True)
+        plt.tight_layout()
+        # Show plot
+        plt.show()
+    
     
     
 

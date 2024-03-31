@@ -46,7 +46,7 @@ class Make_Quadtree:
         # Root prediciton. Receiving predicted value and store in dataframe. 
         df = mod.root_node_prediction(df)
 
-        print(df)
+        # print(df)
 
         # Extract data points from Longitude and Latitude columns and insert them into the quadtree
         for index, row in df.iterrows():
