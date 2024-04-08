@@ -97,6 +97,7 @@ class Preprocess:
         new_df = new_df[['index', 'CMPLNT_FR_DT', 'CMPLNT_DATETIME', 'Longitude', 'Latitude', 'Scl_Longitude', 'Scl_Latitude', 'Hour_of_crime',  'Dayofweek_of_crime',  'Quarter_of_crime',  'Month_of_crime',  'Dayofyear_of_crime',  'Dayofmonth_of_crime',  'Weekofyear_of_crime', 'Year_of_crime', 'Distance_From_Central_Point', 'Crime_count', 'Longitude_Latitude_Ratio', 'Location_density']]
         return new_df  
 
+    # COUNT DAILY CRIMES IN EACH LEAF NODE.
     # result = pd.DataFrame(dataframe.groupby('CMPLNT_FR_DT').CMPLNT_FR_DT.agg(['count']).reset_index())
     def count_daily_crime(self, leaf_data_frames):
         for leaf_df  in leaf_data_frames:

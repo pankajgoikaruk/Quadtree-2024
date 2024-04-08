@@ -7,7 +7,7 @@ mod = Modelling()
 class Make_Quadtree:
     def __init__(self) -> None:
         pass
-
+    # CREATE QUADTREE.  
     def make_quadtree(self, df):
         # Calculate a suitable minimum value for max_points based on the number of records
         min_points = len(df) // 50  # Taking one-tenth of data frame.

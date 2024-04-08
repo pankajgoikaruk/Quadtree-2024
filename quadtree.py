@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-from xgboost import XGBRegressor
 from sklearn.preprocessing import MinMaxScaler
 from modelling import Modelling
 
@@ -135,39 +133,39 @@ class Quadtree:
         # NW Quadrant
         nw_boundary = Rectangle(self.boundary.x1, y_mid, x_mid, self.boundary.y2)
         nw_quadtree = Quadtree(nw_boundary, self.max_points, self.max_levels)
-        nw_quadtree.node_id = self.next_node_id * 4 + 1  # Assign unique ID
-        nw_quadtree.level = self.level + 1  # Increment level
-        self.next_node_id += 1  # Increment next_node_id
+        # nw_quadtree.node_id = self.next_node_id * 4 + 1  # Assign unique ID
+        # nw_quadtree.level = self.level + 1  # Increment level
+        # self.next_node_id += 1  # Increment next_node_id
         self.children.append(nw_quadtree)
 
         # NE Quadrant
         ne_boundary = Rectangle(x_mid, y_mid, self.boundary.x2, self.boundary.y2)
         ne_quadtree = Quadtree(ne_boundary, self.max_points, self.max_levels)
-        ne_quadtree.node_id = self.next_node_id * 4 + 2  # Assign unique ID
-        ne_quadtree.level = self.level + 1  # Increment level
-        self.next_node_id += 1  # Increment next_node_id
+        # ne_quadtree.node_id = self.next_node_id * 4 + 2  # Assign unique ID
+        # ne_quadtree.level = self.level + 1  # Increment level
+        # self.next_node_id += 1  # Increment next_node_id
         self.children.append(ne_quadtree)
 
         # SW Quadrant
         sw_boundary = Rectangle(self.boundary.x1, self.boundary.y1, x_mid, y_mid)
         sw_quadtree = Quadtree(sw_boundary, self.max_points, self.max_levels)
-        sw_quadtree.node_id = self.next_node_id * 4 + 3  # Assign unique ID
-        sw_quadtree.level = self.level + 1  # Increment level
-        self.next_node_id += 1  # Increment next_node_id
+        # sw_quadtree.node_id = self.next_node_id * 4 + 3  # Assign unique ID
+        # sw_quadtree.level = self.level + 1  # Increment level
+        # self.next_node_id += 1  # Increment next_node_id
         self.children.append(sw_quadtree)
 
         # SE Quadrant
         se_boundary = Rectangle(x_mid, self.boundary.y1, self.boundary.x2, y_mid)
         se_quadtree = Quadtree(se_boundary, self.max_points, self.max_levels)
-        se_quadtree.node_id = self.next_node_id * 4 + 4  # Assign unique ID
-        se_quadtree.level = self.level + 1  # Increment level
-        self.next_node_id += 1  # Increment next_node_id
+        # se_quadtree.node_id = self.next_node_id * 4 + 4  # Assign unique ID
+        # se_quadtree.level = self.level + 1  # Increment level
+        # self.next_node_id += 1  # Increment next_node_id
         self.children.append(se_quadtree)
 
         # Extract all attribute from current node.
         df = self.get_current_node_data(self.points)
 
-        # # Perfome Prediction on each parent level.
+        # # PERFOME PREDICTION ON EACH PARENT LEVEL.
         # df = mod.parent_node_prediction(df)
 
 
@@ -186,7 +184,7 @@ class Quadtree:
         #     child.node_id = self.node_id * 4 + self.children.index(child) + 1
         #     child.level = self.level + 1
 
-        # This points contails all data points of current parent node which will be recursively distribute to its children. This for loop will distribute spatial data to belongingings child node according to spatio location (longitude and latitude). 
+        # This points contails all data points of current parent node which will be recursively distribute to its children. This "for loop" will distribute spatial data to belongingings child node according to spatio location (longitude and latitude). 
         for point in self.points:
             for child in self.children:
                 if child.boundary.contains_point(point.x, point.y):
@@ -253,7 +251,8 @@ class Quadtree:
         traverse(self)
 
         return leaf_nodes
-    # Get all data points of current node.
+    
+    # COLLECT A LIST OF DATASETS FROM EACH LEAF NODE.
     def get_leaf_data_points(self):
         """
         Retrieve all data points from leaf nodes and store them in a list of DataFrames.

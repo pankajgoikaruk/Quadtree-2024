@@ -7,6 +7,7 @@ import numpy as np
 from visualise import Visualise
 import matplotlib.pyplot as plt
 import seaborn as sns
+# from evaluation import Eval
 
 vis = Visualise()
 
@@ -209,20 +210,22 @@ class Modelling:
             # Concatenate seen_y_pred and unseen_y_pred into a single array
             seen_unseen_y_pred = np.concatenate([seen_y_pred, unseen_y_pred])
             # Attach seen_y_pred and unseen_y_pred predicted values to the actual dataset
-            dcr_data['Predicted'] = seen_unseen_y_pred
+            dcr_data['Predicted'] = seen_unseen_y_pred # For Each DCR in Loop
 
-            # Inversed dcr_data Unix timestamps to data time and scaled values into orginal values.
-            dcr_data['CMPLNT_FR_DT'], dcr_data['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(dcr_data)
-            dcr_data['Crime_count'] = self.inverse_min_max_scale_values(dcr_data, col_name='Crime_count')
-            dcr_data['Predicted'] = self.inverse_min_max_scale_values(dcr_data, col_name='Predicted')
+
+
+            # # Inversed dcr_data Unix timestamps to data time and scaled values into orginal values.
+            # dcr_data['CMPLNT_FR_DT'], dcr_data['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(dcr_data)
+            # dcr_data['Crime_count'] = self.inverse_min_max_scale_values(dcr_data, col_name='Crime_count')
+            # dcr_data['Predicted'] = self.inverse_min_max_scale_values(dcr_data, col_name='Predicted')
 
             ############ Seen Data Evaluation and Inversed ###############
-            train_df['seen_pred'] = seen_y_pred
+            # train_df['seen_pred'] = seen_y_pred
 
-            # Inversed Unix timestamps to data time and scaled values into orginal values.
-            train_df['CMPLNT_FR_DT'], train_df['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(train_df)
-            train_df['Crime_count'] = self.inverse_min_max_scale_values(train_df, col_name='Crime_count')
-            train_df['seen_pred'] = self.inverse_min_max_scale_values(train_df, col_name='seen_pred')
+            # # Inversed Unix timestamps to data time and scaled values into orginal values.
+            # train_df['CMPLNT_FR_DT'], train_df['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(train_df)
+            # train_df['Crime_count'] = self.inverse_min_max_scale_values(train_df, col_name='Crime_count')
+            # train_df['seen_pred'] = self.inverse_min_max_scale_values(train_df, col_name='seen_pred')
 
             seen_evaluation = Evaluation(y_train, seen_y_pred)
 
@@ -238,14 +241,11 @@ class Modelling:
 
             ############ Unseen Data Evaluation and Inversed ###############
             test_df['unseen_pred'] = unseen_y_pred
-
-            # Append the modified test_df to the list
-            all_test_dfs.append(test_df)
             
-            # Inversed Unix timestamps to data time and scaled values into orginal values.
-            test_df['CMPLNT_FR_DT'], test_df['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(test_df)
-            test_df['Crime_count'] = self.inverse_min_max_scale_values(test_df, col_name='Crime_count')
-            test_df['unseen_pred'] = self.inverse_min_max_scale_values(test_df, col_name='unseen_pred')
+            # # Inversed Unix timestamps to data time and scaled values into orginal values.
+            # test_df['CMPLNT_FR_DT'], test_df['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(test_df)
+            # test_df['Crime_count'] = self.inverse_min_max_scale_values(test_df, col_name='Crime_count')
+            # test_df['unseen_pred'] = self.inverse_min_max_scale_values(test_df, col_name='unseen_pred')
             
             unseen_evaluation = Evaluation(y_test, unseen_y_pred)
 
@@ -259,8 +259,11 @@ class Modelling:
             # Append the results to the DataFrame
             unseen_evaluation_results.append({'DCR_ID': dcr_id, 'MAE': mae, 'RMSE': rmse, 'MAPE': mape, 'ME': me, 'DCR_Length': dcr_len})
 
+            # Append each DCR's test_df with predicted values in list. Note: for each DCR.
+            all_test_dfs.append(test_df) # It contained inversed scaled values. 
+
             # Append dcr_data to the list
-            all_dcr_data.append(dcr_data)
+            all_dcr_data.append(dcr_data)  # Append all data including training and testing prediction values of each DCR in list. It contained Inversed scaled values.
 
             ############ Visualisation ############
 
@@ -269,24 +272,25 @@ class Modelling:
         
         # Concat all test (unseen) dataset predicted values in single df.
         # Concatenate all modified test_df dataframes into a single dataframe
-        combined_test_df = pd.concat(all_test_dfs)
+        combined_test_df = pd.concat(all_test_dfs) # All scaled list of test data predicted values are stored in combined_test_df. Note: values are already scaled. 
         # Inversed Unix timestamps to data time and scaled values into orginal values.
         combined_test_df['CMPLNT_FR_DT'], combined_test_df['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(combined_test_df)
         combined_test_df['Crime_count'] = self.inverse_min_max_scale_values(combined_test_df, col_name='Crime_count')
         combined_test_df['unseen_pred'] = self.inverse_min_max_scale_values(combined_test_df, col_name='unseen_pred')
 
         # Concatenate all_dcr_data into a single DataFrame
-        new_combined_df = pd.concat(all_dcr_data)
-        new_combined_df = new_combined_df.sort_values(by='CMPLNT_FR_DT')
+        combined_leaf_df_with_pred_col = pd.concat(all_dcr_data) # It is lists of all dcrs including training prediction and testing prediction Invesed scaled values. 
+        combined_leaf_df_with_pred_col['CMPLNT_FR_DT'], combined_leaf_df_with_pred_col['CMPLNT_DATETIME'] = self.unix_timestamps_to_datetime(combined_leaf_df_with_pred_col)
+        combined_leaf_df_with_pred_col['Crime_count'] = self.inverse_min_max_scale_values(combined_leaf_df_with_pred_col, col_name='Crime_count')
+        combined_leaf_df_with_pred_col['Predicted'] = self.inverse_min_max_scale_values(combined_leaf_df_with_pred_col, col_name='Predicted')
+        combined_leaf_df_with_pred_col = combined_leaf_df_with_pred_col.sort_values(by='CMPLNT_FR_DT') # Sorting all DCR values for time-series values. Because Each DCR contain values from benining (2008) to end (2009) Therefore unable to plot timeseries. 
 
         # Converst evaluation results dictionary into dataframe. 
         seen_evaluation_df = pd.DataFrame(seen_evaluation_results)
         unseen_evaluation_df = pd.DataFrame(unseen_evaluation_results)
 
-        return new_combined_df, seen_evaluation_df, unseen_evaluation_df, combined_test_df
-    
-    
-    
+        return combined_leaf_df_with_pred_col, seen_evaluation_df, unseen_evaluation_df, combined_test_df
+
     
     
 
